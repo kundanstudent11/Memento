@@ -40,7 +40,10 @@ export function SpendByCategoryChart({ data, currency }: SpendByCategoryChartPro
             <XAxis dataKey="category" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip
-              formatter={(value: number) => [`${currency} ${value.toFixed(2)}`, 'Total']}
+              formatter={(value) => {
+                const num = typeof value === 'number' ? value : 0;
+                return [`${currency} ${num.toFixed(2)}`, 'Total'];
+              }}
             />
             <Bar dataKey="total" fill="#4f46e5" radius={[6, 6, 0, 0]} />
           </BarChart>
