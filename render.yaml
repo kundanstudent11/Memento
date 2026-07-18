@@ -29,13 +29,13 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CORS_ORIGIN
-        value: https://memento-frontend.onrender.com
+        value: https://memento-a3vn.onrender.com
       - key: FRONTEND_URL
-        value: https://memento-frontend.onrender.com
+        value: https://memento-a3vn.onrender.com
       - key: GOOGLE_CALLBACK_URL
-        value: https://memento-backend.onrender.com/api/v1/auth/google/callback
+        value: https://memento-be.onrender.com/api/v1/auth/google/callback
       - key: GOOGLE_GMAIL_CALLBACK_URL
-        value: https://memento-backend.onrender.com/api/v1/gmail/callback
+        value: https://memento-be.onrender.com/api/v1/gmail/callback
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
       # Set these manually in the Render dashboard (Environment tab).
@@ -62,7 +62,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        value: https://memento-backend.onrender.com
+        value: https://memento-be.onrender.com
     routes:
       - type: rewrite
         source: /*
