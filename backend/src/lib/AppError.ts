@@ -60,3 +60,21 @@ export class AiExtractionError extends AppError {
     super(message, 502, 'AI_EXTRACTION_FAILED');
   }
 }
+
+export class GmailNotConnectedError extends AppError {
+  constructor(message = 'Gmail is not connected') {
+    super(message, 400, 'GMAIL_NOT_CONNECTED');
+  }
+}
+
+export class GmailAuthError extends AppError {
+  constructor(message = 'Gmail authorization failed') {
+    super(message, 401, 'GMAIL_AUTH_FAILED');
+  }
+}
+
+export class GmailSyncError extends AppError {
+  constructor(message = 'Gmail sync failed') {
+    super(message, 502, 'GMAIL_SYNC_FAILED');
+  }
+}

@@ -1,10 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Brain, FileText, MessageSquare, Home, LogOut } from 'lucide-react';
+import { Brain, FileText, MessageSquare, Home, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { Button } from '@/components/ui/Button';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home', end: true },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', end: false },
   { to: '/documents', icon: FileText, label: 'Documents', end: false },
   { to: '/chat', icon: MessageSquare, label: 'Ask Memento', end: false },
 ];
