@@ -53,7 +53,10 @@ export type ErrorCode =
   | 'INTERNAL_ERROR'
   | 'AI_EXTRACTION_FAILED'
   | 'UNSUPPORTED_FILE_TYPE'
-  | 'FILE_TOO_LARGE';
+  | 'FILE_TOO_LARGE'
+  | 'GMAIL_NOT_CONNECTED'
+  | 'GMAIL_AUTH_FAILED'
+  | 'GMAIL_SYNC_FAILED';
 
 export type ValidationFieldError = {
   field: string;

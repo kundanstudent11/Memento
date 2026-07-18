@@ -31,11 +31,14 @@ export const documentsRepository = {
   /**
    * Returns a paginated, filtered, sorted list of documents and the total count.
    */
-  async findAll(query: ListDocumentsQuery): Promise<{ items: Document[]; total: number }> {
-    const conditions = [];
+  async findAll(
+    userId: string,
+    query: ListDocumentsQuery
+  ): Promise<{ items: Document[]; total: number }> {
+    const conditions = [eq(documentsTable.userId, userId)];
     if (query.category) conditions.push(eq(documentsTable.category, query.category));
     if (query.status) conditions.push(eq(documentsTable.status, query.status));
-    const where = conditions.length > 0 ? and(...conditions) : undefined;
+    const where = and(...conditions);
 
     const sortCol = SORT_COLUMNS[query.sort] ?? documentsTable.uploadedAt;
     const order = query.order === 'asc' ? asc(sortCol) : desc(sortCol);
@@ -58,11 +61,11 @@ export const documentsRepository = {
   /**
    * Finds a single document by ID, returns null if not found.
    */
-  async findById(id: string): Promise<Document | null> {
+  async findById(userId: string, id: string): Promise<Document | null> {
     const [row] = await db
       .select()
       .from(documentsTable)
-      .where(eq(documentsTable.id, id));
+      .where(and(eq(documentsTable.id, id), eq(documentsTable.userId, userId)));
     return row ? toDocument(row) : null;
   },
 
@@ -77,10 +80,10 @@ export const documentsRepository = {
   /**
    * Deletes a document by ID. Returns true if a row was deleted.
    */
-  async delete(id: string): Promise<boolean> {
+  async delete(userId: string, id: string): Promise<boolean> {
     const deleted = await db
       .delete(documentsTable)
-      .where(eq(documentsTable.id, id))
+      .where(and(eq(documentsTable.id, id), eq(documentsTable.userId, userId)))
       .returning({ id: documentsTable.id });
     return deleted.length > 0;
   },

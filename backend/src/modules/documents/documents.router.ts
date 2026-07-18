@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticate } from '../../middleware/authenticate';
 import { documentsController } from './documents.controller';
 import { upload } from '../../middleware/upload';
 import { validate } from '../../middleware/validate';
@@ -9,6 +10,8 @@ import {
 } from './documents.schema';
 
 const router = Router();
+
+router.use(authenticate);
 
 router.get('/', validate('query', listDocumentsQuerySchema), documentsController.list);
 router.get('/:id', documentsController.getById);
