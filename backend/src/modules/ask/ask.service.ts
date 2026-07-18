@@ -1,6 +1,6 @@
 import type { AskResponse } from '@shared/types';
 import { logger } from '../../lib/logger';
-import { generateTextContent } from '../../lib/gemini';
+import { generateTextContent } from '../../lib/llm';
 import { gmailInsightRepository } from '../gmail/gmail-insight.repository';
 import { getGmailStats } from '../gmail/gmail.stats.service';
 import { ASK_SYSTEM_PROMPT, buildAskContext } from './ask.prompt';

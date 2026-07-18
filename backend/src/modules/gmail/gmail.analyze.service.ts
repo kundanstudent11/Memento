@@ -1,4 +1,4 @@
-import { generateJsonContent } from '../../lib/gemini';
+import { generateJsonContent } from '../../lib/llm';
 import { env } from '../../config/env';
 import { logger } from '../../lib/logger';
 import {

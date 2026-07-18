@@ -1,4 +1,4 @@
-import { Type, type Schema } from '../../lib/gemini';
+import { Type, type Schema } from '../../lib/llm';
 
 export const GMAIL_EXTRACTION_SYSTEM_PROMPT = `You are Memento's email analysis engine. You receive a batch of raw emails
 belonging to one user. Extract ONLY financially or administratively relevant

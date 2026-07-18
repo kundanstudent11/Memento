@@ -36,8 +36,14 @@ services:
         value: https://memento-be.onrender.com/api/v1/auth/google/callback
       - key: GOOGLE_GMAIL_CALLBACK_URL
         value: https://memento-be.onrender.com/api/v1/gmail/callback
+      - key: LLM_PROVIDER
+        value: groq
       - key: GEMINI_MODEL
         value: gemini-2.5-flash
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_API_KEY
+        sync: false
       # Set these manually in the Render dashboard (Environment tab).
       - key: GOOGLE_CLIENT_ID
         sync: false
