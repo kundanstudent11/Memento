@@ -8,7 +8,7 @@
     "build": "echo 'tsx runtime — no compilation step needed'",
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "db:push": "drizzle-kit push --force",
+    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "lint": "eslint src --ext .ts"
   },
