@@ -3,6 +3,7 @@ import Layout from '@/components/layout/Layout';
 import HomePage from '@/pages/HomePage';
 import DocumentsPage from '@/pages/DocumentsPage';
 import ChatPage from '@/pages/ChatPage';
+import DashboardPage from '@/pages/DashboardPage';
 import { LoginPage, ProtectedRoute } from '@/features/auth';
 
 export function AppRouter() {
@@ -12,6 +13,7 @@ export function AppRouter() {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
           <Route path="documents" element={<DocumentsPage />} />
           <Route path="chat" element={<ChatPage />} />
         </Route>
