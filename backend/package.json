@@ -10,6 +10,9 @@
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "db:drop": "drizzle-kit drop",
+    "db:check": "drizzle-kit check",
+    "db:mark-baseline": "tsx scripts/mark-baseline-migrated.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
