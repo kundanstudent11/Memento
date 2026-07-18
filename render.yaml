@@ -1,0 +1,66 @@
+# render.yaml — Render Infrastructure as Code
+# Docs: https://render.com/docs/yaml-spec
+#
+# Services defined here:
+#   1. memento-backend  — Node.js web service (Express API)
+#   2. memento-frontend — Static site (React + Vite)
+#   3. memento-db       — Managed PostgreSQL database
+
+services:
+  # ---------------------------------------------------------------------------
+  # Backend — Node.js API
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: memento-backend
+    env: node
+    region: oregon
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run db:push && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: memento-db
+          property: connectionString
+      # Set this to your frontend URL once the static site is deployed.
+      # If you keep the service name "memento-frontend", this URL is correct.
+      - key: CORS_ORIGIN
+        value: https://memento-frontend.onrender.com
+      # Add your OpenAI key manually in the Render dashboard (Environment tab).
+      - key: OPENAI_API_KEY
+        sync: false
+
+  # ---------------------------------------------------------------------------
+  # Frontend — React static site
+  # ---------------------------------------------------------------------------
+  - type: static
+    name: memento-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      # Set this to your backend URL once the web service is deployed.
+      # If you keep the service name "memento-backend", this URL is correct.
+      - key: VITE_API_URL
+        value: https://memento-backend.onrender.com
+    routes:
+      # SPA fallback — send all unknown paths to index.html
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+# ---------------------------------------------------------------------------
+# PostgreSQL database
+# ---------------------------------------------------------------------------
+databases:
+  - name: memento-db
+    plan: free
+    region: oregon
+    databaseName: memento
+    user: memento_user

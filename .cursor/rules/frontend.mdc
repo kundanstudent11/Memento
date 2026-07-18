@@ -1,0 +1,112 @@
+---
+description: Frontend architecture, design philosophy, component patterns, and data-fetching conventions for Memento React app
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend Architecture
+
+## Design Philosophy
+- **Feature-based**: each domain owns its own components, hooks, services, and types
+- **Dumb UI, Smart Hooks**: components render; hooks think; services fetch
+- **Design system first**: never style ad-hoc — use Tailwind tokens from `tailwind.config.js`
+- **No prop-drilling beyond 2 levels**: lift to context or server state (React Query)
+
+## Folder Structure
+
+```
+src/
+  app/              ← providers, router, App root (no feature logic here)
+  features/
+    documents/
+      components/   ← presentational components for this feature
+      hooks/        ← useDocuments, useUpload (data + state logic)
+      services/     ← raw API calls (returns typed data)
+      index.ts      ← barrel export
+    chat/           ← same pattern
+  components/
+    ui/             ← design system: Button, Card, Input, Badge, Spinner…
+    layout/         ← Sidebar, Header, Layout wrapper
+  lib/
+    api/            ← axios client + response interceptors
+    utils/          ← pure utility functions
+  pages/            ← thin shell: imports feature components, sets page title
+  types/            ← app-level types that extend shared/
+```
+
+## Component Rules
+
+```tsx
+// ✅ GOOD — single responsibility, typed props, no business logic
+interface DocumentCardProps {
+  document: Document;
+  onDelete: (id: string) => void;
+}
+export function DocumentCard({ document, onDelete }: DocumentCardProps) { ... }
+
+// ❌ BAD — fetching inside a presentational component
+export function DocumentCard({ id }: { id: string }) {
+  const [doc, setDoc] = useState();
+  useEffect(() => { fetch(`/api/documents/${id}`)... }, [id]);
+}
+```
+
+## Custom Hooks Rules
+- One hook per concern; hooks can call other hooks
+- Hooks own loading/error state; expose clean interface
+- Prefix: `use<Noun>` for data hooks, `use<Verb>` for action hooks
+
+```typescript
+// ✅ data hook
+export function useDocuments() {
+  return useQuery({ queryKey: ['documents'], queryFn: documentsService.list });
+}
+
+// ✅ action hook
+export function useUploadDocument() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: documentsService.upload,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['documents'] }),
+  });
+}
+```
+
+## Service Layer (API calls)
+
+```typescript
+// features/documents/services/documents.service.ts
+// Returns typed data — never ApiResponse envelope
+export const documentsService = {
+  list: (): Promise<Document[]> =>
+    apiClient.get<ApiResponse<Document[]>>('/documents').then(r => r.data.data),
+  upload: (file: File): Promise<Document> => { ... },
+};
+```
+
+## State Management
+- **Server state**: React Query (useQuery / useMutation) — never useState for remote data
+- **UI state**: useState / useReducer in the component or hook
+- **Global UI state** (modals, theme): React Context, scoped to `app/`
+- No Redux unless the team explicitly decides otherwise
+
+## UI Design Tokens (Tailwind)
+Use the design scale consistently:
+- Spacing: `4, 8, 12, 16, 20, 24, 32, 40, 48` (px-1 = 4px)
+- Radius: `rounded-lg` (8px) for cards/inputs, `rounded-full` for chips/avatars
+- Brand color: `brand-600` primary, `brand-50` backgrounds, `brand-700` hover
+- Shadows: `shadow-sm` on cards, `shadow-md` on modals
+- Typography: `text-sm` (14px) body, `text-base` (16px) prose, `text-2xl font-bold` page headings
+
+## Error & Loading States
+Every data-dependent component must handle all three states:
+```tsx
+if (isLoading) return <Spinner />;
+if (isError) return <ErrorMessage error={error} />;
+return <ActualContent data={data} />;
+```
+
+## File Size Limits
+- Component file: ≤ 150 lines — extract sub-components if exceeded
+- Hook file: ≤ 80 lines
+- Service file: ≤ 60 lines
