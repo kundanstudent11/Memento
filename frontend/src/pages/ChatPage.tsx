@@ -6,10 +6,10 @@ import { Button } from '@/components/ui/Button';
 import { Spinner } from '@/components/ui/Spinner';
 
 const SUGGESTIONS = [
-  'What do I owe this month?',
-  'When does my car insurance expire?',
-  "What's my next prescription refill date?",
-  'Show me all documents due in the next 30 days',
+  'How much am I spending on subscriptions each month?',
+  "What's my biggest recurring charge?",
+  'Any renewals or bills coming up soon?',
+  'Break down my spending by category',
 ];
 
 export default function ChatPage() {
@@ -36,7 +36,7 @@ export default function ChatPage() {
       <div className="py-6 border-b border-slate-100">
         <h1 className="text-xl font-bold text-slate-900">Ask Memento</h1>
         <p className="text-sm text-slate-500 mt-0.5">
-          Ask anything about your documents in plain language
+          Ask anything about your synced data in plain language
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export default function ChatPage() {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask anything about your documents…"
+          placeholder="Ask anything about your synced data…"
           disabled={isLoading}
         />
         <Button type="submit" disabled={!input.trim() || isLoading} className="shrink-0">

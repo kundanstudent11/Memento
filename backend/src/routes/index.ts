@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { documentsRouter } from '../modules/documents';
 import { authRouter } from '../modules/auth';
 import { gmailRouter } from '../modules/gmail';
+import { askRouter } from '../modules/ask';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.get('/', (_req, res) => {
 router.use('/auth', authRouter);
 router.use('/documents', documentsRouter);
 router.use('/gmail', gmailRouter);
+router.use('/ask', askRouter);
 
 export default router;

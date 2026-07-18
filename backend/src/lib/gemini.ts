@@ -55,5 +55,40 @@ export async function generateJsonContent(params: {
   }
 }
 
+/**
+ * Generates a free-text (conversational) answer from Gemini.
+ * Used for grounded Q&A where the response is prose, not structured JSON.
+ */
+export async function generateTextContent(params: {
+  systemInstruction: string;
+  userPrompt: string;
+}): Promise<string> {
+  try {
+    const ai = getGeminiClient();
+    const response = await ai.models.generateContent({
+      model: env.GEMINI_MODEL,
+      contents: params.userPrompt,
+      config: {
+        systemInstruction: params.systemInstruction,
+        temperature: 0.3,
+      },
+    });
+
+    const text = response.text;
+    if (!text) {
+      throw new AiExtractionError('Gemini returned an empty response');
+    }
+    return text;
+  } catch (err) {
+    if (err instanceof AiExtractionError) throw err;
+    logger.error('Gemini text generation failed', {
+      error: err instanceof Error ? err.message : String(err),
+    });
+    throw new AiExtractionError(
+      err instanceof Error ? err.message : 'Gemini query failed'
+    );
+  }
+}
+
 export { Type };
 export type { Schema };

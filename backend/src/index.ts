@@ -2,10 +2,8 @@ import 'dotenv/config';
 import app from './app';
 import { env } from './config/env';
 import { logger } from './lib/logger';
-import { runStartupMigration } from './lib/db/migrate';
 
 async function start(): Promise<void> {
-  await runStartupMigration();
 
   app.listen(env.PORT, () => {
     logger.info(`Memento API running on http://localhost:${env.PORT}`, {
