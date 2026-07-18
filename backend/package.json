@@ -8,8 +8,13 @@
     "build": "echo 'tsx runtime — no compilation step needed'",
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push --force",
     "db:studio": "drizzle-kit studio",
+    "db:drop": "drizzle-kit drop",
+    "db:check": "drizzle-kit check",
+    "db:mark-baseline": "tsx scripts/mark-baseline-migrated.ts",
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
