@@ -1,0 +1,79 @@
+---
+description: API request/response envelope standard and shared types contract for Memento
+globs: {backend/src/**/*.ts,frontend/src/**/*.ts,frontend/src/**/*.tsx,shared/**/*.ts}
+alwaysApply: false
+---
+
+# API Standards & Shared Contract
+
+## Response Envelope — always this shape
+
+```typescript
+// Success
+{
+  "success": true,
+  "data": T,
+  "meta": {              // optional — for paginated lists
+    "total": 42,
+    "page": 1,
+    "perPage": 20
+  },
+  "message": "Created"  // optional — human-readable confirmation
+}
+
+// Error
+{
+  "success": false,
+  "error": {
+    "code": "DOCUMENT_NOT_FOUND",   // machine-readable, SCREAMING_SNAKE
+    "message": "Document not found", // human-readable
+    "details": [...]                  // optional — validation field errors
+  }
+}
+```
+
+## Error Codes (add as you build)
+| Code | HTTP Status | Meaning |
+|---|---|---|
+| `VALIDATION_ERROR` | 400 | Request body/query failed Zod schema |
+| `NOT_FOUND` | 404 | Resource does not exist |
+| `UNAUTHORIZED` | 401 | Missing / invalid auth token |
+| `FORBIDDEN` | 403 | Authenticated but not allowed |
+| `CONFLICT` | 409 | Duplicate resource |
+| `INTERNAL_ERROR` | 500 | Unhandled server failure |
+| `AI_EXTRACTION_FAILED` | 502 | Upstream AI service error |
+
+## Shared Types Location
+All request/response types live in `shared/src/types/` — import from there in both backend and frontend.
+
+```typescript
+// ✅ backend controller
+import type { Document, ApiResponse } from '@shared/types';
+
+// ✅ frontend service
+import type { Document, ApiResponse } from '@shared/types';
+
+// ❌ never define Document in two places
+```
+
+## Path Alias
+Both workspaces configure `@shared/*` → `../shared/src/*` in their tsconfig.
+
+## URL Conventions
+- Base: `/api/v1/<resource>`
+- Collections: plural noun — `/documents`
+- Single resource: `/documents/:id`
+- Actions on resource: `/documents/:id/extract`
+- Cross-resource action: `/query` under `/documents`
+- HTTP verbs are semantic — `GET` read, `POST` create/action, `PUT` full replace, `PATCH` partial update, `DELETE` remove
+
+## Pagination (when lists grow)
+Query params: `?page=1&perPage=20&sort=createdAt&order=desc`
+
+## Date Format
+Always ISO-8601 strings: `"2026-07-18T06:17:00.000Z"` — never Unix timestamps in JSON
+
+## File Upload
+- Field name: `file` (single) or `files` (multiple)
+- `multipart/form-data`
+- Metadata fields (category, description) sent as additional form fields, not JSON body

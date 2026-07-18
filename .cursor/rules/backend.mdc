@@ -1,0 +1,83 @@
+---
+description: Backend architecture, layering rules, error handling, and validation patterns for Memento Express API
+globs: backend/**/*.ts
+alwaysApply: false
+---
+
+# Backend Architecture
+
+## Layered Structure (strict, no skip-layers)
+
+```
+Request → Router → Controller → Service → (Repository / external SDK)
+```
+
+| Layer | Responsibility | Must NOT |
+|---|---|---|
+| **Router** | Mount routes, attach middleware | Contain logic |
+| **Controller** | Parse req, call service, format response via `ApiResponse` | Contain business logic |
+| **Service** | All business logic, orchestration | Know about `req`/`res` |
+| **Repository** | Data access only (DB, file, cache) | Contain business logic |
+
+## Module Structure
+
+Each feature lives in `src/modules/<feature>/`:
+```
+documents/
+  documents.router.ts      ← express Router
+  documents.controller.ts  ← request handling only
+  documents.service.ts     ← business logic
+  documents.schema.ts      ← Zod validation schemas
+  documents.repository.ts  ← data access (add when DB lands)
+```
+
+## API Response — always use `ApiResponse` builder
+
+```typescript
+// ✅ GOOD
+res.status(200).json(ApiResponse.success(data));
+res.status(201).json(ApiResponse.success(data, { message: 'Created' }));
+res.status(400).json(ApiResponse.error('Validation failed', { errors }));
+
+// ❌ BAD — raw shape, no envelope
+res.json({ data });
+res.json({ error: 'bad' });
+```
+
+## Validation — Zod at the controller boundary
+
+```typescript
+// documents.schema.ts
+export const uploadQuerySchema = z.object({
+  category: z.enum(['bill', 'prescription', 'insurance', 'other']).optional(),
+});
+
+// documents.controller.ts
+import { validate } from '../../middleware/validate';
+router.post('/upload', upload.single('file'), validate('body', uploadBodySchema), controller.upload);
+```
+
+## Error Handling
+
+```typescript
+// ✅ throw typed errors in services
+import { AppError, NotFoundError, ValidationError } from '../../lib/AppError';
+
+if (!doc) throw new NotFoundError('Document not found');
+
+// The global errorHandler converts AppError → correct HTTP status automatically.
+// Never catch-and-swallow in services — let errors bubble.
+```
+
+## Environment Config
+- All env vars read through `src/config/env.ts` (Zod-validated at startup)
+- Never `process.env.X` inline — always import from `config/env`
+
+## Logging
+- Use `logger` from `src/lib/logger.ts` — never `console.log` in production code
+- Log level convention: `logger.info` for lifecycle, `logger.warn` for recoverable, `logger.error` for failures with stack
+
+## File Organisation Rules
+- No logic in `app.ts` or `index.ts` — wiring only
+- Barrel exports (`index.ts`) at module root for clean imports
+- Keep files under 200 lines; extract to sub-files otherwise

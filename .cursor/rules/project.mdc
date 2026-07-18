@@ -1,0 +1,45 @@
+---
+description: Core project philosophy, naming conventions, and cross-cutting standards for Memento
+alwaysApply: true
+---
+
+# Memento — Project Standards
+
+## Architecture Principles
+- **Feature-first**: code lives next to the feature it belongs to
+- **Separation of concerns**: route → controller → service → repository (backend); page → feature → ui (frontend)
+- **Single responsibility**: one reason to change per module
+- **Shared API contract**: types in `shared/src/types/` are the single source of truth for all request/response shapes — never duplicate them
+
+## Naming Conventions
+
+| Thing | Pattern | Example |
+|---|---|---|
+| Files | `kebab-case` | `user-profile.ts` |
+| React components | `PascalCase` file & export | `DocumentCard.tsx` |
+| Classes | `PascalCase` | `AppError` |
+| Functions / variables | `camelCase` | `fetchDocuments` |
+| Constants | `SCREAMING_SNAKE` | `MAX_FILE_SIZE` |
+| Zod schemas | `camelCase + Schema` | `uploadDocumentSchema` |
+| Types/Interfaces | `PascalCase` | `Document`, `ApiResponse<T>` |
+
+## TypeScript Rules
+- `strict: true` always — no `any`, no `as unknown as X` escape hatches
+- Prefer `type` over `interface` for plain data shapes; use `interface` for extensible contracts
+- Explicit return types on all exported functions
+- Never use non-null assertion (`!`) — use guard or throw instead
+
+## Error Handling
+- All async code wrapped in try/catch; errors forwarded to the next error handler (backend) or displayed via toast (frontend)
+- Use typed `AppError` subclasses — never `throw new Error('raw string')` in business logic
+- Log at the boundary (controller/page), not deep in service layers
+
+## Feature Development Workflow
+- One PR per feature slice — never mix unrelated changes
+- New feature = new module in `backend/src/modules/<name>/` + `frontend/src/features/<name>/`
+- Update shared types first, then backend, then frontend
+
+## Comments & Docs
+- No comments that restate what the code does
+- JSDoc on all exported functions in `lib/` and `services/`
+- Inline comments only for non-obvious "why", not "what"
