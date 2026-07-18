@@ -6,20 +6,21 @@ import { documentsRepository } from './documents.repository';
 import type { UploadDocumentBody, ListDocumentsQuery, QueryDocumentsBody } from './documents.schema';
 
 export const documentsService = {
-  async list(query: ListDocumentsQuery): Promise<{ items: Document[]; total: number }> {
-    return documentsRepository.findAll(query);
+  async list(userId: string, query: ListDocumentsQuery): Promise<{ items: Document[]; total: number }> {
+    return documentsRepository.findAll(userId, query);
   },
 
-  async getById(id: string): Promise<Document> {
-    const doc = await documentsRepository.findById(id);
+  async getById(userId: string, id: string): Promise<Document> {
+    const doc = await documentsRepository.findById(userId, id);
     if (!doc) throw new NotFoundError(`Document not found: ${id}`);
     return doc;
   },
 
-  async create(file: Express.Multer.File, body: UploadDocumentBody): Promise<Document> {
+  async create(userId: string, file: Express.Multer.File, body: UploadDocumentBody): Promise<Document> {
     const now = new Date();
     const doc = await documentsRepository.create({
       id: uuidv4(),
+      userId,
       originalName: file.originalname,
       filename: file.filename,
       mimeType: file.mimetype,
@@ -36,14 +37,14 @@ export const documentsService = {
     return doc;
   },
 
-  async delete(id: string): Promise<void> {
-    const deleted = await documentsRepository.delete(id);
+  async delete(userId: string, id: string): Promise<void> {
+    const deleted = await documentsRepository.delete(userId, id);
     if (!deleted) throw new NotFoundError(`Document not found: ${id}`);
     logger.info('Document deleted', { id });
   },
 
-  async query(body: QueryDocumentsBody): Promise<QueryDocumentsResponse> {
-    logger.info('Document query received', { question: body.question });
+  async query(userId: string, body: QueryDocumentsBody): Promise<QueryDocumentsResponse> {
+    logger.info('Document query received', { userId, question: body.question });
 
     // TODO: replace stub with real LLM + RAG pipeline
     return {

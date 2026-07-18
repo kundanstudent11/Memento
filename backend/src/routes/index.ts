@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { documentsRouter } from '../modules/documents';
+import { authRouter } from '../modules/auth';
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.get('/', (_req, res) => {
   });
 });
 
+router.use('/auth', authRouter);
 router.use('/documents', documentsRouter);
 
 export default router;
