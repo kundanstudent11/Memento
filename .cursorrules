@@ -1,0 +1,110 @@
+## Project: Memento
+
+AI-powered document memory app. Photograph or upload any bill, prescription, insurance letter, or warranty card → AI extracts structured info (type, amount, due date, provider, key terms) → reminders auto-created → ask questions in plain language across everything you've uploaded.
+
+---
+
+## Stack
+
+- **Backend**: Node.js + Express + TypeScript — `/backend`, port **3001**
+- **Frontend**: React 18 + Vite + TypeScript + Tailwind CSS — `/frontend`, port **5173**
+- **Shared types**: `/shared/src/types/` — imported by both sides via `@shared/*` alias
+- **AI**: OpenAI GPT-4o Vision (extraction) + GPT-4o (reasoning/query)
+- **DB**: PostgreSQL via Drizzle ORM (`DATABASE_URL` in `backend/.env`)
+
+---
+
+## Architecture Rules (never violate these)
+
+### Backend — strict layering, no skip-layers
+
+```
+Request → Router → Controller → Service → Repository
+```
+
+- **Router** (`modules/<name>/<name>.router.ts`): mount routes + middleware only
+- **Controller** (`modules/<name>/<name>.controller.ts`): parse req → call service → `ApiResponse.success/error()`
+- **Service** (`modules/<name>/<name>.service.ts`): all business logic, no `req`/`res` knowledge
+- **Repository** (`modules/<name>/<name>.repository.ts`): DB/file access only
+
+Always use `ApiResponse` builder — never construct raw JSON in controllers.
+Always throw typed `AppError` subclasses from services — never `throw new Error('string')`.
+Always read env through `config/env.ts` — never `process.env.X` inline.
+Always use `logger` from `lib/logger.ts` — never `console.log` in production paths.
+Always validate requests with `validate()` middleware + Zod schema at the router level.
+
+### Frontend — feature-based, smart hooks / dumb components
+
+```
+pages/ (shell) → features/<name>/ → components/ui/ (design system)
+```
+
+- **Page**: imports feature components, sets title, no logic
+- **Feature** (`features/<name>/`): owns `components/`, `hooks/`, `services/`, `index.ts` barrel
+- **Hook**: owns data-fetching (React Query) or action state — no JSX
+- **Service** (`features/<name>/services/<name>.service.ts`): raw API calls, returns unwrapped typed data
+- **UI component** (`components/ui/`): presentational only, typed props, no fetch calls
+
+Server state: React Query only — no `useState` for remote data.
+Error + loading states: every data-dependent component handles all three.
+
+---
+
+## Shared API Contract
+
+**Every** endpoint returns this envelope — no exceptions:
+
+```typescript
+// Success
+{ success: true, data: T, message?: string, meta?: PaginationMeta }
+
+// Error
+{ success: false, error: { code: ErrorCode, message: string, details?: ValidationFieldError[] } }
+```
+
+Types live in `/shared/src/types/` — import `@shared/types` in both backend and frontend.
+Never define `Document`, `ApiResponse`, or domain types in two places.
+
+---
+
+## Environment Variables (`backend/.env`)
+
+```
+PORT=3001
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
+DATABASE_URL=postgresql://...
+OPENAI_API_KEY=sk-...
+```
+
+All env vars are Zod-validated at startup in `backend/src/config/env.ts`. App exits immediately if any required var is missing — fail fast, no silent defaults in production.
+
+---
+
+## Coding Standards
+
+- **TypeScript strict mode always** — no `any`, no `!` non-null assertion, explicit return types on exports
+- **Naming**: files `kebab-case`, components `PascalCase`, functions/vars `camelCase`, constants `SCREAMING_SNAKE`, Zod schemas `camelCaseSchema`
+- **File size limits**: component ≤150 lines, hook ≤80 lines, service ≤60 lines — extract if exceeded
+- **No comments** that restate what the code does; only explain non-obvious *why*
+- **Error boundary**: log at the controller/page boundary; services bubble, never swallow
+
+---
+
+## Feature Development Workflow
+
+1. Update `/shared/src/types/` first — define the contract
+2. Build backend module (`schema → service → controller → router`)
+3. Build frontend feature (`service → hooks → components → page`)
+4. Branch: `feat/<name>` → `develop` → `main` (all merges `--no-ff`)
+5. Commit format: `feat(<scope>): <imperative verb> <subject>` (Conventional Commits)
+
+---
+
+## Verification Checklist (after any change)
+
+- `cd backend && npx tsc --noEmit` → zero errors
+- `cd frontend && npx tsc --noEmit` → zero errors
+- `GET http://localhost:3001/health` → `{ "status": "ok" }`
+- No `console.log` left in committed code (use `logger`)
+- Response matches `ApiSuccess<T>` or `ApiError` envelope exactly
