@@ -41,14 +41,18 @@ export default function HomePage() {
           creates reminders, and lets you ask questions across all of it.
         </p>
         <div className="flex items-center justify-center gap-3 mt-8">
-          <Button as={Link} to="/documents">
-            <Upload className="w-4 h-4" />
-            Upload a document
-          </Button>
-          <Button variant="secondary" as={Link} to="/chat">
-            <MessageSquare className="w-4 h-4" />
-            Ask a question
-          </Button>
+          <Link to="/documents">
+            <Button>
+              <Upload className="w-4 h-4" />
+              Upload a document
+            </Button>
+          </Link>
+          <Link to="/chat">
+            <Button variant="secondary">
+              <MessageSquare className="w-4 h-4" />
+              Ask a question
+            </Button>
+          </Link>
         </div>
       </div>
 
